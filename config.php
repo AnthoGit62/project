@@ -1,6 +1,10 @@
 <?php
 session_start();
 
+// Afficher les erreurs en développement (à désactiver en production)
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 // Configuration de la base de données
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'weazel_news');
@@ -34,7 +38,7 @@ function getDB() {
         );
         return $pdo;
     } catch (PDOException $e) {
-        die("Erreur de connexion : " . $e->getMessage());
+        die("Erreur de connexion à la base de données : " . $e->getMessage());
     }
 }
 
@@ -62,7 +66,7 @@ function requireLogin() {
 function requireRole($roles) {
     requireLogin();
     if (!hasRole($roles)) {
-        header('Location: index.php');
+        header('Location: dashboard.php');
         exit;
     }
 }
@@ -89,7 +93,7 @@ function verifyPassword($password, $hash) {
 
 // Sécuriser l'affichage
 function e($string) {
-    return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+    return htmlspecialchars($string ?? '', ENT_QUOTES, 'UTF-8');
 }
 
 // Upload de fichier sécurisé
@@ -124,11 +128,14 @@ function uploadFile($file, $type = 'fichier') {
     $filepath = $dir . $filename;
     
     if (move_uploaded_file($file['tmp_name'], $filepath)) {
+        // Générer l'URL relative
+        $relative_path = '/uploads/' . ($type === 'image' ? 'images/' : ($type === 'facture' ? 'factures/' : 'fichiers/')) . $filename;
+        
         return [
             'success' => true,
             'filename' => $filename,
             'filepath' => $filepath,
-            'url' => str_replace(__DIR__, '', $filepath)
+            'url' => $relative_path
         ];
     }
     
@@ -137,6 +144,7 @@ function uploadFile($file, $type = 'fichier') {
 
 // Formater une date
 function formatDate($date) {
+    if (empty($date)) return '-';
     return date('d/m/Y à H:i', strtotime($date));
 }
 

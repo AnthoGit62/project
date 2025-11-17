@@ -356,7 +356,7 @@ if (!$commande) {
                 <div class="info-value"><?= e($commande['email']) ?></div>
             </div>
             
-            <?php if ($commande['telephone']): ?>
+            <?php if (!empty($commande['telephone'])): ?>
             <div class="info-group">
                 <div class="info-label">Téléphone</div>
                 <div class="info-value"><?= e($commande['telephone']) ?></div>
@@ -386,7 +386,7 @@ if (!$commande) {
             </div>
             <?php endif; ?>
             
-            <?php if ($commande['facture_url']): ?>
+            <?php if (!empty($commande['facture_url'])): ?>
             <div class="actions">
                 <h3 style="color: #e94560; margin-bottom: 1rem;">Facture</h3>
                 <a href="<?= e($commande['facture_url']) ?>" target="_blank" class="btn btn-primary" style="width: 100%; text-align: center; display: block; text-decoration: none;">
@@ -429,27 +429,37 @@ if (!$commande) {
         const userId = <?= $user['id'] ?>;
         let lastMessageId = 0;
         let selectedFile = null;
-        let factureUploaded = <?= $commande['facture_url'] ? 'true' : 'false' ?>;
+        let factureUploaded = <?= !empty($commande['facture_url']) ? 'true' : 'false' ?>;
         
         // Gestion de la sélection de fichier pour le chat
-        document.getElementById('fileInput')?.addEventListener('change', function(e) {
-            selectedFile = e.target.files[0];
-            const fileInfo = document.getElementById('selectedFileInfo');
-            if (selectedFile) {
-                fileInfo.textContent = `📎 Fichier sélectionné: ${selectedFile.name}`;
-                fileInfo.style.display = 'block';
-            } else {
-                fileInfo.style.display = 'none';
-            }
-        });
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                selectedFile = e.target.files[0];
+                const fileInfo = document.getElementById('selectedFileInfo');
+                if (selectedFile) {
+                    fileInfo.textContent = `📎 Fichier sélectionné: ${selectedFile.name}`;
+                    fileInfo.style.display = 'block';
+                } else {
+                    fileInfo.style.display = 'none';
+                }
+            });
+        }
         
         // Envoyer un message
-        document.getElementById('sendBtn')?.addEventListener('click', sendMessage);
-        document.getElementById('messageInput')?.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && e.ctrlKey) {
-                sendMessage();
-            }
-        });
+        const sendBtn = document.getElementById('sendBtn');
+        if (sendBtn) {
+            sendBtn.addEventListener('click', sendMessage);
+        }
+        
+        const messageInput = document.getElementById('messageInput');
+        if (messageInput) {
+            messageInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    sendMessage();
+                }
+            });
+        }
         
         async function sendMessage() {
             const messageInput = document.getElementById('messageInput');
@@ -478,7 +488,8 @@ if (!$commande) {
                 if (data.success) {
                     messageInput.value = '';
                     selectedFile = null;
-                    document.getElementById('fileInput').value = '';
+                    const fileInputElem = document.getElementById('fileInput');
+                    if (fileInputElem) fileInputElem.value = '';
                     document.getElementById('selectedFileInfo').style.display = 'none';
                     loadMessages();
                 } else {
@@ -504,16 +515,16 @@ if (!$commande) {
                         
                         let content = `
                             <div class="message-header">
-                                <span class="message-author">${msg.prenom} ${msg.nom} (${msg.role})</span>
+                                <span class="message-author">${escapeHtml(msg.prenom)} ${escapeHtml(msg.nom)} (${escapeHtml(msg.role)})</span>
                                 <span class="message-time">${new Date(msg.date_envoi).toLocaleString('fr-FR')}</span>
                             </div>
-                            <div class="message-content">${msg.message || ''}</div>
+                            <div class="message-content">${escapeHtml(msg.message || '')}</div>
                         `;
                         
                         if (msg.type_message === 'image' && msg.fichier_url) {
-                            content += `<img src="${msg.fichier_url}" class="message-image" alt="Image">`;
+                            content += `<img src="${escapeHtml(msg.fichier_url)}" class="message-image" alt="Image">`;
                         } else if (msg.fichier_url) {
-                            content += `<a href="${msg.fichier_url}" class="message-file" target="_blank">📎 ${msg.fichier_nom}</a>`;
+                            content += `<a href="${escapeHtml(msg.fichier_url)}" class="message-file" target="_blank">📎 ${escapeHtml(msg.fichier_nom)}</a>`;
                         }
                         
                         messageDiv.innerHTML = content;
@@ -530,79 +541,87 @@ if (!$commande) {
         }
         
         // Upload de facture
-        document.getElementById('uploadFactureForm')?.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const factureInput = document.getElementById('factureInput');
-            const file = factureInput.files[0];
-            
-            if (!file) {
-                showAlert('actionAlert', 'Veuillez sélectionner une facture', 'error');
-                return;
-            }
-            
-            const formData = new FormData();
-            formData.append('commande_id', commandeId);
-            formData.append('facture', file);
-            
-            try {
-                const response = await fetch('api/chat.php?action=upload_facture', {
-                    method: 'POST',
-                    body: formData
-                });
+        const uploadFactureForm = document.getElementById('uploadFactureForm');
+        if (uploadFactureForm) {
+            uploadFactureForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
                 
-                const data = await response.json();
+                const factureInput = document.getElementById('factureInput');
+                const file = factureInput.files[0];
                 
-                if (data.success) {
-                    showAlert('actionAlert', 'Facture uploadée avec succès !', 'success');
-                    factureUploaded = true;
-                    document.getElementById('closeCommandeBtn').disabled = false;
-                    loadMessages();
-                } else {
-                    showAlert('actionAlert', data.error, 'error');
+                if (!file) {
+                    showAlert('actionAlert', 'Veuillez sélectionner une facture', 'error');
+                    return;
                 }
-            } catch (error) {
-                showAlert('actionAlert', 'Erreur lors de l\'upload', 'error');
-            }
-        });
-        
-        // Fermer la commande
-        document.getElementById('closeCommandeBtn')?.addEventListener('click', async function() {
-            if (!factureUploaded) {
-                showAlert('actionAlert', 'Veuillez d\'abord uploader une facture', 'error');
-                return;
-            }
-            
-            if (!confirm('Êtes-vous sûr de vouloir fermer cette commande ?')) {
-                return;
-            }
-            
-            try {
+                
                 const formData = new FormData();
                 formData.append('commande_id', commandeId);
+                formData.append('facture', file);
                 
-                const response = await fetch('api/commandes.php?action=close', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    showAlert('actionAlert', 'Commande fermée avec succès !', 'success');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    showAlert('actionAlert', data.error, 'error');
+                try {
+                    const response = await fetch('api/chat.php?action=upload_facture', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showAlert('actionAlert', 'Facture uploadée avec succès !', 'success');
+                        factureUploaded = true;
+                        document.getElementById('closeCommandeBtn').disabled = false;
+                        loadMessages();
+                    } else {
+                        showAlert('actionAlert', data.error, 'error');
+                    }
+                } catch (error) {
+                    showAlert('actionAlert', 'Erreur lors de l\'upload', 'error');
                 }
-            } catch (error) {
-                showAlert('actionAlert', 'Erreur lors de la fermeture', 'error');
-            }
-        });
+            });
+        }
+        
+        // Fermer la commande
+        const closeCommandeBtn = document.getElementById('closeCommandeBtn');
+        if (closeCommandeBtn) {
+            closeCommandeBtn.addEventListener('click', async function() {
+                if (!factureUploaded) {
+                    showAlert('actionAlert', 'Veuillez d\'abord uploader une facture', 'error');
+                    return;
+                }
+                
+                if (!confirm('Êtes-vous sûr de vouloir fermer cette commande ?')) {
+                    return;
+                }
+                
+                try {
+                    const formData = new FormData();
+                    formData.append('commande_id', commandeId);
+                    
+                    const response = await fetch('api/commandes.php?action=close', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showAlert('actionAlert', 'Commande fermée avec succès !', 'success');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showAlert('actionAlert', data.error, 'error');
+                    }
+                } catch (error) {
+                    showAlert('actionAlert', 'Erreur lors de la fermeture', 'error');
+                }
+            });
+        }
         
         function showAlert(elementId, message, type) {
             const alertDiv = document.getElementById(elementId);
+            if (!alertDiv) return;
+            
             alertDiv.className = `alert alert-${type}`;
             alertDiv.textContent = message;
             alertDiv.style.display = 'block';
@@ -610,6 +629,17 @@ if (!$commande) {
             setTimeout(() => {
                 alertDiv.style.display = 'none';
             }, 5000);
+        }
+        
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text || '').replace(/[&<>"']/g, m => map[m]);
         }
         
         // Charger les messages au démarrage

@@ -74,6 +74,7 @@ $stats = getDashboardStats($user['id'], $user['role']);
             text-decoration: none;
             transition: all 0.3s;
             border-left: 3px solid transparent;
+            cursor: pointer;
         }
         
         .nav-item:hover, .nav-item.active {
@@ -242,6 +243,24 @@ $stats = getDashboardStats($user['id'], $user['role']);
             background: #c93750;
             transform: translateY(-2px);
         }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-success {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4caf50;
+            color: #4caf50;
+        }
+        
+        .alert-error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff0000;
+            color: #ffcccc;
+        }
     </style>
 </head>
 <body>
@@ -256,20 +275,20 @@ $stats = getDashboardStats($user['id'], $user['role']);
         </div>
         
         <nav class="nav-menu">
-            <a href="#dashboard" class="nav-item active" onclick="showSection('dashboard')">📊 Tableau de bord</a>
-            <a href="#commandes" class="nav-item" onclick="showSection('commandes')">📦 Mes commandes</a>
+            <a href="#dashboard" class="nav-item active" onclick="showSection('dashboard', event)">📊 Tableau de bord</a>
+            <a href="#commandes" class="nav-item" onclick="showSection('commandes', event)">📦 Mes commandes</a>
             
             <?php if ($user['role'] === 'client'): ?>
-            <a href="#nouvelle-commande" class="nav-item" onclick="showSection('nouvelle-commande')">➕ Nouvelle commande</a>
+            <a href="#nouvelle-commande" class="nav-item" onclick="showSection('nouvelle-commande', event)">➕ Nouvelle commande</a>
             <?php endif; ?>
             
             <?php if (in_array($user['role'], ['personnel', 'direction'])): ?>
-            <a href="#toutes-commandes" class="nav-item" onclick="showSection('toutes-commandes')">📋 Toutes les commandes</a>
-            <a href="#outils" class="nav-item" onclick="showSection('outils')">🛠️ Outils</a>
+            <a href="#toutes-commandes" class="nav-item" onclick="showSection('toutes-commandes', event)">📋 Toutes les commandes</a>
+            <a href="#outils" class="nav-item" onclick="showSection('outils', event)">🛠️ Outils</a>
             <?php endif; ?>
             
             <?php if ($user['role'] === 'direction'): ?>
-            <a href="#gestion-personnel" class="nav-item" onclick="showSection('gestion-personnel')">👥 Gestion Personnel</a>
+            <a href="#gestion-personnel" class="nav-item" onclick="showSection('gestion-personnel', event)">👥 Gestion Personnel</a>
             <?php endif; ?>
         </nav>
         
@@ -373,7 +392,11 @@ $stats = getDashboardStats($user['id'], $user['role']);
         // Passer le rôle de l'utilisateur au JavaScript
         document.body.dataset.userRole = '<?= $user['role'] ?>';
         
-        function showSection(sectionId) {
+        function showSection(sectionId, event) {
+            if (event) {
+                event.preventDefault();
+            }
+            
             // Cacher toutes les sections
             document.querySelectorAll('.content-section').forEach(section => {
                 section.classList.remove('active');
@@ -388,7 +411,9 @@ $stats = getDashboardStats($user['id'], $user['role']);
             document.getElementById(sectionId).classList.add('active');
             
             // Ajouter la classe active au lien cliqué
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
             
             // Charger le contenu si nécessaire
             loadSectionContent(sectionId);
@@ -398,17 +423,19 @@ $stats = getDashboardStats($user['id'], $user['role']);
             switch(sectionId) {
                 case 'commandes':
                 case 'toutes-commandes':
-                    if (commandesData.length === 0) {
+                    if (typeof commandesData === 'undefined' || commandesData.length === 0) {
                         loadCommandes();
                     } else {
                         updateCommandesDisplay();
                     }
                     break;
                 case 'nouvelle-commande':
-                    renderNouvelleCommande();
+                    if (typeof renderNouvelleCommande === 'function') {
+                        renderNouvelleCommande();
+                    }
                     break;
                 case 'gestion-personnel':
-                    if (personnelData.length === 0) {
+                    if (typeof personnelData === 'undefined' || personnelData.length === 0) {
                         loadPersonnel();
                     } else {
                         updatePersonnelDisplay();
@@ -419,7 +446,9 @@ $stats = getDashboardStats($user['id'], $user['role']);
         
         // Charger le contenu initial
         document.addEventListener('DOMContentLoaded', function() {
-            loadInitialData();
+            if (typeof loadInitialData === 'function') {
+                loadInitialData();
+            }
         });
     </script>
 </body>

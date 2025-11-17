@@ -92,7 +92,7 @@ function renderCommandesTable(commandes) {
             <td>${escapeHtml(commande.type_commande)}</td>`;
         
         if (currentRole !== 'client') {
-            html += `<td>${escapeHtml(commande.prenom)} ${escapeHtml(commande.nom)}</td>`;
+            html += `<td>${escapeHtml(commande.prenom || '')} ${escapeHtml(commande.nom || '')}</td>`;
         }
         
         html += `<td>${formatDate(commande.date_creation)}</td>
@@ -265,24 +265,24 @@ function showAddPersonnelModal() {
             <div id="modalAlert"></div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                 <div>
-                    <label style="display: block; margin-bottom: 0.5rem;">Nom *</label>
+                    <label style="display: block; margin-bottom: 0.5rem; color: #fff;">Nom *</label>
                     <input type="text" name="nom" required style="width: 100%; padding: 0.6rem; border-radius: 5px; border: 1px solid #ccc;">
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 0.5rem;">Prénom *</label>
+                    <label style="display: block; margin-bottom: 0.5rem; color: #fff;">Prénom *</label>
                     <input type="text" name="prenom" required style="width: 100%; padding: 0.6rem; border-radius: 5px; border: 1px solid #ccc;">
                 </div>
             </div>
             <div style="margin-bottom: 1rem;">
-                <label style="display: block; margin-bottom: 0.5rem;">Email *</label>
+                <label style="display: block; margin-bottom: 0.5rem; color: #fff;">Email *</label>
                 <input type="email" name="email" required style="width: 100%; padding: 0.6rem; border-radius: 5px; border: 1px solid #ccc;">
             </div>
             <div style="margin-bottom: 1rem;">
-                <label style="display: block; margin-bottom: 0.5rem;">Mot de passe *</label>
+                <label style="display: block; margin-bottom: 0.5rem; color: #fff;">Mot de passe *</label>
                 <input type="password" name="password" required minlength="6" style="width: 100%; padding: 0.6rem; border-radius: 5px; border: 1px solid #ccc;">
             </div>
             <div style="margin-bottom: 1rem;">
-                <label style="display: block; margin-bottom: 0.5rem;">Téléphone</label>
+                <label style="display: block; margin-bottom: 0.5rem; color: #fff;">Téléphone</label>
                 <input type="tel" name="telephone" style="width: 100%; padding: 0.6rem; border-radius: 5px; border: 1px solid #ccc;">
             </div>
             <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
@@ -334,6 +334,12 @@ function showAddPersonnelModal() {
     });
 }
 
+// Modifier un personnel
+function editPersonnel(id) {
+    alert('Fonction de modification en cours de développement');
+    // TODO: Implémenter la modification
+}
+
 // Supprimer un personnel
 async function deletePersonnel(id) {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce membre du personnel ?')) {
@@ -371,10 +377,11 @@ function escapeHtml(text) {
         '"': '&quot;',
         "'": '&#039;'
     };
-    return String(text).replace(/[&<>"']/g, m => map[m]);
+    return String(text || '').replace(/[&<>"']/g, m => map[m]);
 }
 
 function formatDate(dateString) {
+    if (!dateString) return '-';
     const date = new Date(dateString);
     return date.toLocaleDateString('fr-FR', {
         day: '2-digit',
