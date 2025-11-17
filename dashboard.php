@@ -278,10 +278,6 @@ $stats = getDashboardStats($user['id'], $user['role']);
             <a href="#dashboard" class="nav-item active" onclick="showSection('dashboard', event)">📊 Tableau de bord</a>
             <a href="#commandes" class="nav-item" onclick="showSection('commandes', event)">📦 Mes commandes</a>
             
-            <?php if ($user['role'] === 'client'): ?>
-            <a href="#nouvelle-commande" class="nav-item" onclick="showSection('nouvelle-commande', event)">➕ Nouvelle commande</a>
-            <?php endif; ?>
-            
             <?php if (in_array($user['role'], ['personnel', 'direction'])): ?>
             <a href="#toutes-commandes" class="nav-item" onclick="showSection('toutes-commandes', event)">📋 Toutes les commandes</a>
             <a href="#outils" class="nav-item" onclick="showSection('outils', event)">🛠️ Outils</a>

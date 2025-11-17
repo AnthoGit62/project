@@ -17,11 +17,14 @@ define('FACTURES_DIR', UPLOAD_DIR . 'factures/');
 define('IMAGES_DIR', UPLOAD_DIR . 'images/');
 define('FICHIERS_DIR', UPLOAD_DIR . 'fichiers/');
 
+// URL de base (à adapter selon votre installation)
+define('BASE_URL', 'http://localhost/weazel_news');
+
 // Créer les dossiers s'ils n'existent pas
-if (!file_exists(UPLOAD_DIR)) mkdir(UPLOAD_DIR, 0755, true);
-if (!file_exists(FACTURES_DIR)) mkdir(FACTURES_DIR, 0755, true);
-if (!file_exists(IMAGES_DIR)) mkdir(IMAGES_DIR, 0755, true);
-if (!file_exists(FICHIERS_DIR)) mkdir(FICHIERS_DIR, 0755, true);
+if (!file_exists(UPLOAD_DIR)) mkdir(UPLOAD_DIR, 0777, true);
+if (!file_exists(FACTURES_DIR)) mkdir(FACTURES_DIR, 0777, true);
+if (!file_exists(IMAGES_DIR)) mkdir(IMAGES_DIR, 0777, true);
+if (!file_exists(FICHIERS_DIR)) mkdir(FICHIERS_DIR, 0777, true);
 
 // Connexion à la base de données
 function getDB() {
@@ -81,13 +84,17 @@ function getCurrentUser() {
     return $stmt->fetch();
 }
 
-// Hasher un mot de passe
+// Hasher un mot de passe - CORRIGÉ
 function hashPassword($password) {
-    return password_hash($password, PASSWORD_BCRYPT);
+    return password_hash($password, PASSWORD_BCRYPT, ['cost' => 10]);
 }
 
-// Vérifier un mot de passe
+// Vérifier un mot de passe - CORRIGÉ
 function verifyPassword($password, $hash) {
+    // S'assurer que le hash est valide
+    if (empty($hash) || strlen($hash) < 60) {
+        return false;
+    }
     return password_verify($password, $hash);
 }
 
@@ -96,7 +103,7 @@ function e($string) {
     return htmlspecialchars($string ?? '', ENT_QUOTES, 'UTF-8');
 }
 
-// Upload de fichier sécurisé
+// Upload de fichier sécurisé - CORRIGÉ
 function uploadFile($file, $type = 'fichier') {
     $allowed_types = [
         'image' => ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
@@ -128,8 +135,9 @@ function uploadFile($file, $type = 'fichier') {
     $filepath = $dir . $filename;
     
     if (move_uploaded_file($file['tmp_name'], $filepath)) {
-        // Générer l'URL relative
-        $relative_path = '/uploads/' . ($type === 'image' ? 'images/' : ($type === 'facture' ? 'factures/' : 'fichiers/')) . $filename;
+        // Générer l'URL relative - CORRIGÉ
+        $relative_path = str_replace($_SERVER['DOCUMENT_ROOT'], '', $filepath);
+        $relative_path = str_replace('\\', '/', $relative_path);
         
         return [
             'success' => true,

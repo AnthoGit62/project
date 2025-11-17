@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weazel News - Catalogue</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding-top: 100px;
+        }
+
+        /* TOP TICKER */
+        .ticker {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 14px;
+            z-index: 1400;
+            background: linear-gradient(90deg, rgba(200, 90, 58, 0.2), rgba(0, 0, 0, 0.1));
+            border-bottom: 1px solid rgba(200, 90, 58, 0.3);
+            backdrop-filter: blur(6px);
+        }
+
+        .ticker .live {
+            background: #c85a3a;
+            color: white;
+            font-weight: 700;
+            padding: 6px 10px;
+            border-radius: 4px;
+            letter-spacing: 0.6px;
+            font-size: 0.92rem;
+            box-shadow: 0 6px 18px rgba(200, 90, 58, 0.3);
+        }
+
+        .ticker .marquee {
+            overflow: hidden;
+            white-space: nowrap;
+            color: #d0d0d0;
+            font-size: 0.95rem;
+            flex: 1;
+        }
+
+        .marquee-inner {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 18s linear infinite;
+        }
+
+        @keyframes marquee {
+            from { transform: translateX(0); }
+            to { transform: translateX(-100%); }
+        }
+
+        /* HEADER */
+        header {
+            background: linear-gradient(135deg, #c85a3a 0%, #d97843 100%);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(200, 90, 58, 0.3);
+            position: fixed;
+            top: 40px;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 3rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+            margin-bottom: 0.5rem;
+        }
+
+        .slogan {
+            font-size: 1.2rem;
+            font-style: italic;
+            opacity: 0.9;
+            letter-spacing: 1px;
+        }
+
+        /* NAVIGATION */
+        nav {
+            background: rgba(0,0,0,0.3);
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            border-bottom: 2px solid #c85a3a;
+            position: fixed;
+            top: 155px;
+            left: 0;
+            right: 0;
+            z-index: 99;
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, #c85a3a 0%, #d97843 100%);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 3px 10px rgba(200, 90, 58, 0.2);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(200, 90, 58, 0.3);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #d97843 0%, #c85a3a 100%);
+            box-shadow: 0 5px 15px rgba(200, 90, 58, 0.4);
+        }
+
+        .cart-badge {
+            background: #b04a3a;
+            color: white;
+            border-radius: 50%;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+        }
+
+        /* PAGES */
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+            padding-top: 240px;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .category {
+            margin-bottom: 3rem;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .category-title {
+            font-size: 2rem;
+            color: #d97843;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #c85a3a;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .service-card {
+            background: linear-gradient(135deg, rgba(200,90,58,0.08) 0%, rgba(217,120,67,0.08) 100%);
+            border: 2px solid rgba(200,90,58,0.25);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            border-color: #c85a3a;
+            box-shadow: 0 8px 20px rgba(200, 90, 58, 0.25);
+        }
+
+        .service-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #d97843;
+        }
+
+        .service-price {
+            font-size: 1.5rem;
+            color: #c85a3a;
+            font-weight: bold;
+            margin-bottom: auto;
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #c85a3a 0%, #d97843 100%);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .add-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(200, 90, 58, 0.3);
+        }
+
+        /* PANIER */
+        .cart-item {
+            background: rgba(200,90,58,0.08);
+            border: 2px solid rgba(200,90,58,0.25);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-item-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #d97843;
+            margin-bottom: 0.5rem;
+        }
+
+        .cart-item-price {
+            font-size: 1.2rem;
+            color: #c85a3a;
+        }
+
+        .remove-btn {
+            background: #b04a3a;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background: #9a3d2f;
+            transform: scale(1.05);
+        }
+
+        .total-section {
+            background: linear-gradient(135deg, #c85a3a 0%, #d97843 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-top: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(200, 90, 58, 0.25);
+        }
+
+        .total-amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+
+        .commander-btn {
+            background: white;
+            color: #c85a3a;
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .commander-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .commander-btn:disabled {
+            background: #666;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.3rem;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <!-- TICKER -->
+    <div class="ticker">
+        <div class="live">EN DIRECT</div>
+        <div class="marquee">
+            <div class="marquee-inner">🔥 Weazel News • Dernières mises à jour — Couverture spéciale — Services professionnels pour entreprises, événements et campagnes — Contactez-nous pour diffusion urgente.</div>
+        </div>
+    </div>
+
+    <header>
+        <div class="logo">📺 WEAZEL NEWS</div>
+        <div class="slogan">L'Information en Temps Réel, Votre Vérité en Direct</div>
+    </header>
+
+    <nav>
+        <button class="nav-btn active" onclick="showPage('catalogue')">📋 Catalogue</button>
+        <button class="nav-btn" onclick="showPage('panier')">🛒 Panier <span class="cart-badge" id="cartBadge">0</span></button>
+    </nav>
+
+    <!-- PAGE CATALOGUE -->
+    <div id="catalogue" class="page active">
+        <div class="container">
+            <!-- ACTUALITÉS & COUVERTURE MÉDIA -->
+            <div class="category">
+                <h2 class="category-title">🎥 Actualités & Couverture Média</h2>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-name">🎤 Interviews exclusives</div>
+                        <div class="service-price">5 012$</div>
+                        <button class="add-btn" onclick="addToCart('Interviews exclusives', 5012)">Ajouter au panier</button>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-name">🎬 Couverture d'événements</div>
+                        <div class="service-price">6 415$</div>
+                        <button class="add-btn" onclick="addToCart('Couverture d\'événements', 6415)">Ajouter au panier</button>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-name">⚖️ Couverture de procès</div>
+                        <div class="service-price">9 022$</div>
+                        <button class="add-btn" onclick="addToCart('Couverture de procès', 9022)">Ajouter au panier</button>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-name">ℹ️ Ruban FlashNews</div>
+                        <div class="service-price">1 634$</div>
+                        <button class="add-btn" onclick="addToCart('Ruban FlashNews', 1634)">Ajouter au panier</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ENTREPRISES & PROMOTION -->
+            <div class="category">
+                <h2 class="category-title">💼 Entreprises & Promotion</h2>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-name">📰 Communiqués de presse</div>
+                        <div class="service-price">3 007$</div>
+                        <button class="add-btn" onclick="addToCart('Communiqués de presse', 3007)">Ajouter au panier</button>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-name">🎉 Couverture d'ouverture</div>
+                        <div class="service-price">5 613$</div>
+                        <button class="add-btn" onclick="addToCart('Couverture d\'ouverture', 5613)">Ajouter au panier</button>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-name">🎙️ Interviews promotionnelles</div>
+                        <div class="service-price">4 411$</div>
+                        <button class="add-btn" onclick="addToCart('Interviews promotionnelles', 4411)">Ajouter au panier</button>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-name">🖼️ Création d'affiche</div>
+                        <div class="service-price">4 536$</div>
+                        <button class="add-btn" onclick="addToCart('Création d\'affiche', 4536)">Ajouter au panier</button>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-name">🏡 Mise en valeur de biens immobiliers</div>
+                        <div class="service-price">7 016$</div>
+                        <button class="add-btn" onclick="addToCart('Mise en valeur de biens immobiliers', 7016)">Ajouter au panier</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- POLITIQUE & ÉLECTIONS -->
+            <div class="category">
+                <h2 class="category-title">🏛️ Politique & Élections</h2>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-name">🗳️ Couverture de campagnes électorales</div>
+                        <div class="service-price">13 031$</div>
+                        <button class="add-btn" onclick="addToCart('Couverture de campagnes électorales', 13031)">Ajouter au panier</button>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-name">🎙️ Interviews de candidats</div>
+                        <div class="service-price">6 015$</div>
+                        <button class="add-btn" onclick="addToCart('Interviews de candidats', 6015)">Ajouter au panier</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SÉCURITÉ & JUSTICE -->
+            <div class="category">
+                <h2 class="category-title">🚨 Sécurité & Justice</h2>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-name">🚨 Diffusion d'avis de recherche</div>
+                        <div class="service-price">2 005$</div>
+                        <button class="add-btn" onclick="addToCart('Diffusion d\'avis de recherche', 2005)">Ajouter au panier</button>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-name">⚠️ Alertes citoyennes</div>
+                        <div class="service-price">1 805$</div>
+                        <button class="add-btn" onclick="addToCart('Alertes citoyennes', 1805)">Ajouter au panier</button>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-name">👮 Interviews de forces de l'ordre</div>
+                        <div class="service-price">4 010$</div>
+                        <button class="add-btn" onclick="addToCart('Interviews de forces de l\'ordre', 4010)">Ajouter au panier</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ASSOCIATIONS & SOLIDARITÉ -->
+            <div class="category">
+                <h2 class="category-title">❤️ Associations & Solidarité</h2>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-name">🎗️ Promotion d'événements caritatifs</div>
+                        <div class="service-price">2 406$</div>
+                        <button class="add-btn" onclick="addToCart('Promotion d\'événements caritatifs', 2406)">Ajouter au panier</button>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-name">🤝 Couverture d'actions humanitaires</div>
+                        <div class="service-price">3 007$</div>
+                        <button class="add-btn" onclick="addToCart('Couverture d\'actions humanitaires', 3007)">Ajouter au panier</button>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-name">🌟 Mise en lumière d'associations</div>
+                        <div class="service-price">3 609$</div>
+                        <button class="add-btn" onclick="addToCart('Mise en lumière d\'associations', 3609)">Ajouter au panier</button>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-name">🙏 Appels aux dons</div>
+                        <div class="service-price">1 604$</div>
+                        <button class="add-btn" onclick="addToCart('Appels aux dons', 1604)">Ajouter au panier</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ANNONCES & MESSAGES PERSONNELS -->
+            <div class="category">
+                <h2 class="category-title">💬 Annonces & Messages Personnels</h2>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-name">📢 Diffusion d'annonces importantes</div>
+                        <div class="service-price">3 007$</div>
+                        <button class="add-btn" onclick="addToCart('Diffusion d\'annonces importantes', 3007)">Ajouter au panier</button>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-name">💬 Messages personnels à l'antenne</div>
+                        <div class="service-price">4 010$</div>
+                        <button class="add-btn" onclick="addToCart('Messages personnels à l\'antenne', 4010)">Ajouter au panier</button>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-name">✏️ Création de message personnalisé</div>
+                        <div class="service-price">1 550$</div>
+                        <button class="add-btn" onclick="addToCart('Création de message personnalisé', 1550)">Ajouter au panier</button>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-name">🕊️ Nécrologies et hommages</div>
+                        <div class="service-price">2 406$</div>
+                        <button class="add-btn" onclick="addToCart('Nécrologies et hommages', 2406)">Ajouter au panier</button>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-name">👶 Annonces de naissances/mariages</div>
+                        <div class="service-price">2 005$</div>
+                        <button class="add-btn" onclick="addToCart('Annonces de naissances/mariages', 2005)">Ajouter au panier</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RÉSEAUX SOCIAUX -->
+            <div class="category">
+                <h2 class="category-title">📱 Réseaux Sociaux</h2>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-name">🦜 Poste Birdy</div>
+                        <div class="service-price">756$</div>
+                        <button class="add-btn" onclick="addToCart('Poste Birdy', 756)">Ajouter au panier</button>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-name">📸 Poste Instapic</div>
+                        <div class="service-price">756$</div>
+                        <button class="add-btn" onclick="addToCart('Poste Instapic', 756)">Ajouter au panier</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE PANIER -->
+    <div id="panier" class="page">
+        <div class="container">
+            <h1 class="category-title" style="text-align: center; margin-bottom: 2rem;">🛒 Votre Panier</h1>
+            <div id="cartItems"></div>
+            <div id="totalSection"></div>
+        </div>
+    </div>
+
+    <script>
+        let cart = {};
+
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(pageName).classList.add('active');
+            event.target.classList.add('active');
+
+            if (pageName === 'panier') {
+                updateCartDisplay();
+            }
+        }
+
+        function addToCart(name, price) {
+            const key = name;
+            
+            if (cart[key]) {
+                alert('Ce service est déjà dans votre panier (maximum 1 par service)');
+                return;
+            }
+
+            cart[key] = {
+                name: name,
+                price: price
+            };
+
+            updateCartBadge();
+            alert('✅ Service ajouté au panier !');
+        }
+
+        function removeFromCart(key) {
+            delete cart[key];
+            updateCartDisplay();
+            updateCartBadge();
+        }
+
+        function updateCartBadge() {
+            const count = Object.keys(cart).length;
+            document.getElementById('cartBadge').textContent = count;
+        }
+
+        function updateCartDisplay() {
+            const cartItemsDiv = document.getElementById('cartItems');
+            const totalSectionDiv = document.getElementById('totalSection');
+
+            if (Object.keys(cart).length === 0) {
+                cartItemsDiv.innerHTML = '<div class="empty-cart">😢 Votre panier est vide.<br>Consultez notre catalogue pour ajouter des services.</div>';
+                totalSectionDiv.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            let total = 0;
+
+            for (const [key, item] of Object.entries(cart)) {
+                html += `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${item.name}</div>
+                            <div class="cart-item-price">💰 ${item.price.toLocaleString()}$</div>
+                        </div>
+                        <button class="remove-btn" onclick="removeFromCart('${key}')">🗑️ Retirer</button>
+                    </div>
+                `;
+                total += item.price;
+            }
+
+            cartItemsDiv.innerHTML = html;
+            totalSectionDiv.innerHTML = `
+                <div class="total-section">
+                    <h2>💵 TOTAL</h2>
+                    <div class="total-amount">${total.toLocaleString()}$</div>
+                    <button class="commander-btn" onclick="passerCommande()">
+                        ✓ PASSER COMMANDE
+                    </button>
+                </div>
+            `;
+        }
+
+        function passerCommande() {
+            if (Object.keys(cart).length === 0) {
+                alert('Votre panier est vide !');
+                return;
+            }
+
+            // Envoyer le panier au parent
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    action: 'commander',
+                    panier: cart
+                }, '*');
+            } else {
+                // Si on est pas dans une iframe, rediriger directement
+                localStorage.setItem('weazel_panier', JSON.stringify(cart));
+                window.location.href = 'traiter_commande.php';
+            }
+        }
+
+        updateCartBadge();
+    </script>
+</body>
+</html>
